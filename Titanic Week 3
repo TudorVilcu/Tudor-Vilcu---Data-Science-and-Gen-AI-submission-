@@ -1,0 +1,237 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "source": [
+        "![](https://drive.google.com/uc?export=view&id=1xqQczl0FG-qtNA2_WQYuWePW9oU8irqJ)"
+      ],
+      "metadata": {
+        "id": "ZQ1mkFp7SPa5"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "# Data and Feature Engineering\n",
+        "This Notebook will introduce us to preparing our datasets for data science and AI workloads. For structured data, this will often utilise popular Python libraries such as Pandas, which will be the focus for this Notebook.\n",
+        "\n",
+        "### What is Pandas?\n",
+        "As Python has grown to become a popular solution for data analysis, many new tools have been introduced to support such tasks. Pandas is arguably the most popular and widely used of these, although it does have some limitations (if working with very large datasets you may want to look at Dask and/or PySpark).\n",
+        "\n",
+        "First, we will import it into our session. This effectively means we have opened the library in the background, and can now use the [functions](https://github.com/MJMortensonWarwick/IB2AD0_Data_Science_GenerativeAI/blob/main/1_10_functions.ipynb) built into it. We will also import numpy - another widely used Python package for working with numerical data (the name is a portmanteau of \"numerical\" and \"python\"). By convention we import pandas as \"pd\" and numpy as \"np\". This is equivalent to giving it a variable name."
+      ],
+      "metadata": {
+        "id": "ut4lS-AA1Z54"
+      }
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "BcRkRi_-1VSW"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np"
+      ]
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### Testing our installation\n",
+        "To test everything is working we will load the **Titanic** dataset into a pandas dataframe (more on these below). The file `titanic.csv` holds one row per passenger: whether they survived, their ticket class, name, sex, age, fare and so on.\n",
+        "\n",
+        "**In Colab:** click the folder icon on the left and upload `titanic.csv` before running the next cell."
+      ],
+      "metadata": {
+        "id": "2mtKjCXR1_aA"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "\n",
+        "titanic = pd.read_csv(\"titanic.csv\")\n",
+        "titanic.head(10)"
+      ],
+      "metadata": {
+        "id": "u2y2aDzR2Gyy",
+        "outputId": "a766eafa-2ca2-4247-a9f8-d58a47fec3ee",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 156
+        }
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "`pd.read_csv()` reads a CSV file straight into a dataframe, and `.head(10)` shows us the first 10 rows (just `.head()` shows 5).\n",
+        "\n",
+        "We can check the size of the dataframe with `.shape`, which gives us (rows, columns):"
+      ],
+      "metadata": {
+        "id": "rFdC3a1m2K_6"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "titanic.shape"
+      ],
+      "metadata": {
+        "id": "8q5z8NYZ2P-f"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "We have now successfully created a pandas dataframe with 891 passengers and 12 columns!"
+      ],
+      "metadata": {
+        "id": "YxQaodH72S4O"
+      }
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### What are Dataframes?\n",
+        "Pandas has a very elegant way of managing data, very much borrowed from the statistical language R, mostly based around dataframes. You can think of dataframes a bit like an Excel table with rows, columns and common operations like sum, average and so on. We can use this on top of our previous work on lists and dictionaries (etc.) to make them more usable and malleable.\n",
+        "\n",
+        "To see how this works, we will build a small dataset by hand - in this case a [dictionary](https://github.com/MJMortensonWarwick/IB2AD0_Data_Science_GenerativeAI/blob/main/1_05_dictionaries.ipynb) holding the first four Titanic passengers."
+      ],
+      "metadata": {
+        "id": "LsVLtmhH2WA1"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "passengers = {1:{'name':'Braund, Mr. Owen Harris', 'sex':'male', 'age':22.0, 'pclass':3, 'survived':0},\n",
+        "              2:{'name':'Cumings, Mrs. John Bradley (Florence Briggs Thayer)', 'sex':'female', 'age':38.0, 'pclass':1, 'survived':1},\n",
+        "              3:{'name':'Heikkinen, Miss. Laina', 'sex':'female', 'age':26.0, 'pclass':3, 'survived':1},\n",
+        "              4:{'name':'Futrelle, Mrs. Jacques Heath (Lily May Peel)', 'sex':'female', 'age':35.0, 'pclass':1, 'survived':1}\n",
+        "}\n",
+        "passengers"
+      ],
+      "metadata": {
+        "id": "BoZmysQo2p4Y"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "We can convert this to a Dataframe with great ease. Notice that each outer key (the passenger ID) becomes a column - adding `.T` (transpose) flips it so each passenger is a row, like in the full dataset:"
+      ],
+      "metadata": {
+        "id": "W-szoAC42tIv"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "passengers_df = pd.DataFrame(passengers)\n",
+        "passengers_df.T"
+      ],
+      "metadata": {
+        "id": "7t8ATqP62xAl"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "We can even create such outputs from more complex dictionaries, such as a dictionary which includes a nested list. Here we group the first ten passengers by the port they embarked from (S = Southampton, C = Cherbourg, Q = Queenstown):"
+      ],
+      "metadata": {
+        "id": "eeuSiBtn254W"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "ports = {'S':{'port':'Southampton', 'passengers':7, 'ids':[1, 3, 4, 5, 7, 8, 9]},\n",
+        "         'C':{'port':'Cherbourg', 'passengers':2, 'ids':[2, 10]},\n",
+        "         'Q':{'port':'Queenstown', 'passengers':1, 'ids':[6]}\n",
+        "}\n",
+        "ports"
+      ],
+      "metadata": {
+        "id": "1k6GiP0N29XR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "ports_df = pd.DataFrame(ports)\n",
+        "ports_df"
+      ],
+      "metadata": {
+        "id": "xcatviQm3DJM"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "Pandas dataframes can also be built from various other data structures and sources (including Excel files, CSVs - as we did with `titanic.csv` - text files, databases and many more). For example, we can make our dataframe from a set of [lists](https://github.com/MJMortensonWarwick/IB2AD0_Data_Science_GenerativeAI/blob/main/1_04_lists.ipynb):"
+      ],
+      "metadata": {
+        "id": "AebSOaD_3FJN"
+      }
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "a = [22.0, 38.0, 26.0, 35.0]                    # age\n",
+        "b = [\"male\", \"female\", \"female\", \"female\"]      # sex\n",
+        "c = [False, True, True, True]                   # survived\n",
+        "\n",
+        "listdf = pd.DataFrame([a, b, c])\n",
+        "listdf"
+      ],
+      "metadata": {
+        "id": "ieLiBLDJ3H83"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "markdown",
+      "source": [
+        "### EXERCISE\n",
+        "Try building your own dataframes from a list and/or dictionary using a few more rows of the Titanic data (e.g. passengers 5-8). What would happen if you have an item missing from one element? E.g. if \"c\" in the above example only had three items - False, True, True - rather than four. Test it - does the output match your expectation?"
+      ],
+      "metadata": {
+        "id": "khSIUBMt3LAA"
+      }
+    }
+  ]
+}
